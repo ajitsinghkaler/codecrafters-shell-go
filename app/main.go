@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 )
 
 func main() {
 	// Uncomment this block to pass the first stage
-	for{
+	for {
 		fmt.Fprint(os.Stdout, "$ ")
 
 		// Wait for user input
@@ -21,15 +22,26 @@ func main() {
 		}
 
 		command = command[:len(command)-1]
-		if command == "exit"{
+		builtIn := []string{"exit", "echo", "type"}
+		if command == builtIn[0] {
 			os.Exit(0)
 		}
 
-		if strings.HasPrefix(command, "echo "){
+		if strings.HasPrefix(command, builtIn[1]) {
 			fmt.Println(command[len("echo "):])
 			continue
 		}
 
-		fmt.Print(command[:len(command)], ": command not found \n")
+		if strings.HasPrefix(command, builtIn[2]) {
+			typeCommand := command[len("type "):]
+			if slices.Contains(builtIn, typeCommand) {
+				fmt.Println(typeCommand, "is a shell builtin")
+			} else {
+				fmt.Print(typeCommand, ": not found \n")
+			}
+			continue
+		}
+
+		fmt.Print(command, ": command not found \n")
 	}
 }
