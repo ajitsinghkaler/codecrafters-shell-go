@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -19,11 +20,16 @@ func main() {
 			os.Exit(1)
 		}
 
-
-		if command[:len(command)-1] == "exit"{
+		command = command[:len(command)-1]
+		if command == "exit"{
 			os.Exit(0)
 		}
 
-		fmt.Print(command[:len(command)-1], ": command not found \n")
+		if strings.HasPrefix(command, "echo "){
+			fmt.Println(command[len("echo "):])
+			continue
+		}
+
+		fmt.Print(command[:len(command)], ": command not found \n")
 	}
 }
