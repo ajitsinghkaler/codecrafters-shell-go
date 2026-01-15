@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"slices"
 	"strings"
 )
@@ -31,6 +32,8 @@ func main() {
 			fmt.Println(command[len("echo "):])
 			continue
 		}
+		pathEnv := os.Getenv("PATH")
+		allPaths := strings.Split(pathEnv, string(os.PathListSeparator))
 
 		if strings.HasPrefix(command, builtIn[2]) {
 			typeCommand := command[len("type "):]
@@ -38,9 +41,7 @@ func main() {
 				fmt.Println(typeCommand, "is a shell builtin")
 				continue
 			}
-			pathEnv := os.Getenv("PATH")
 			found := false
-			allPaths := strings.Split(pathEnv, string(os.PathListSeparator))
 			for _, path := range allPaths {
 				fullPath := fmt.Sprintf("%s/%s", path, typeCommand)
 				if FileExecutableExists(fullPath) {
@@ -55,6 +56,26 @@ func main() {
 			}
 			continue
 		}
+		commandParts := strings.Split(command, " ")
+		fileExecutableName := commandParts[0]
+
+		executable := false
+		for _, path := range allPaths {
+			fullPath := fmt.Sprintf("%s/%s", path, fileExecutableName)
+			if FileExecutableExists(fullPath) {
+				cmd := exec.Command(fileExecutableName, commandParts[1:]...)
+				cmdOutput, err := cmd.CombinedOutput()
+				if err != nil {
+					os.Exit(1)
+				}
+				fmt.Print(string(cmdOutput))
+				executable = true
+				break
+			}
+		}
+		if executable {
+			continue
+		}
 
 		fmt.Print(command, ": command not found \n")
 	}
@@ -67,8 +88,5 @@ func FileExecutableExists(filename string) bool {
 		return false
 	}
 
-	if info.Mode().Perm()&0111 != 0 {
-		return true
-	}
-	return false
+	return info.Mode().Perm()&0111 != 0
 }
