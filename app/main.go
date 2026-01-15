@@ -23,13 +23,22 @@ func main() {
 		}
 
 		command = command[:len(command)-1]
-		builtIn := []string{"exit", "echo", "type"}
+		builtIn := []string{"exit", "echo", "type", "pwd"}
 		if command == builtIn[0] {
 			os.Exit(0)
 		}
 
 		if strings.HasPrefix(command, builtIn[1]) {
 			fmt.Println(command[len("echo "):])
+			continue
+		}
+
+		if command == builtIn[3] {
+			dir, err := os.Getwd()
+			if err != nil {
+				os.Exit(1)
+			}
+			fmt.Println(dir)
 			continue
 		}
 		pathEnv := os.Getenv("PATH")
