@@ -36,7 +36,21 @@ func main() {
 			typeCommand := command[len("type "):]
 			if slices.Contains(builtIn, typeCommand) {
 				fmt.Println(typeCommand, "is a shell builtin")
-			} else {
+				continue
+			}
+			pathEnv := os.Getenv("PATH")
+			found := false
+			allPaths := strings.Split(pathEnv, string(os.PathListSeparator))
+			for _, path := range allPaths {
+				fullPath := fmt.Sprintf("%s/%s", path, typeCommand)
+				if FileExecutableExists(fullPath) {
+					fmt.Println(typeCommand, "is", fullPath)
+					found = true
+					break
+				}
+			}
+
+			if !found {
 				fmt.Print(typeCommand, ": not found \n")
 			}
 			continue
@@ -44,4 +58,17 @@ func main() {
 
 		fmt.Print(command, ": command not found \n")
 	}
+}
+
+func FileExecutableExists(filename string) bool {
+	info, err := os.Stat(filename)
+
+	if err != nil {
+		return false
+	}
+
+	if info.Mode().Perm()&0111 != 0 {
+		return true
+	}
+	return false
 }
