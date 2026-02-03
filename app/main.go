@@ -23,13 +23,26 @@ func main() {
 		}
 
 		command = command[:len(command)-1]
-		builtIn := []string{"exit", "echo", "type", "pwd"}
+		builtIn := []string{"exit", "echo", "type", "pwd", "cd"}
 		if command == builtIn[0] {
 			os.Exit(0)
 		}
 
 		if strings.HasPrefix(command, builtIn[1]) {
 			fmt.Println(command[len("echo "):])
+			continue
+		}
+
+		if strings.HasPrefix(command, builtIn[4]) {
+			absolutePath := command[3:]
+			if absolutePath == "~" {
+				absolutePath = os.Getenv("HOME")
+			}
+
+			err := os.Chdir(absolutePath)
+			if err != nil {
+				fmt.Println("cd:", absolutePath+":", "No such file or directory")
+			}
 			continue
 		}
 
