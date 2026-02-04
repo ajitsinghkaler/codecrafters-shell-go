@@ -131,13 +131,19 @@ func clearArguements(echoWords string) []string {
 	var results []string
 	finalWord := ""
 	inQuotes := false
-
+	inDoubleQuotes := false
 	for _, char := range echoWords {
-		if char == '\'' {
+		if char == '\'' && !inDoubleQuotes {
 			inQuotes = !inQuotes
 			continue
 		}
-		if !inQuotes && char == ' ' {
+
+		if char == '"' && !inQuotes {
+			inDoubleQuotes = !inDoubleQuotes
+			continue
+		}
+
+		if !inQuotes && !inDoubleQuotes && char == ' ' {
 			if finalWord != "" {
 				results = append(results, finalWord)
 				finalWord = ""
