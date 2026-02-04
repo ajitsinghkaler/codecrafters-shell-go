@@ -134,7 +134,7 @@ func clearArguements(echoWords string) []string {
 	inDoubleQuotes := false
 	for i := 0; i < len(echoWords); i++ {
 		char := echoWords[i]
-		if char == '\\' && i+1 < len(echoWords) {
+		if char == '\\' && i+1 < len(echoWords) && !inQuotes {
 			finalWord = finalWord + string(echoWords[i+1])
 			i++
 			continue
