@@ -29,7 +29,9 @@ func main() {
 		}
 
 		if strings.HasPrefix(command, builtIn[1]) {
-			fmt.Println(command[len("echo "):])
+			echoWords := command[len("echo "):]
+			results := clearArguements(echoWords)
+			fmt.Println(strings.Join(results, " "))
 			continue
 		}
 
@@ -56,6 +58,18 @@ func main() {
 		}
 		pathEnv := os.Getenv("PATH")
 		allPaths := strings.Split(pathEnv, string(os.PathListSeparator))
+		if strings.HasPrefix(command, "cat ") {
+			paths := command[4:]
+			outputPaths := clearArguements(paths)
+			cmd := exec.Command("cat", outputPaths...)
+			output, err := cmd.Output()
+			if err != nil {
+				fmt.Print("An error occured while outputting")
+			}
+			fmt.Print(string(output))
+			continue
+
+		}
 
 		if strings.HasPrefix(command, builtIn[2]) {
 			typeCommand := command[len("type "):]
@@ -111,4 +125,29 @@ func FileExecutableExists(filename string) bool {
 	}
 
 	return info.Mode().Perm()&0111 != 0
+}
+
+func clearArguements(echoWords string) []string {
+	var results []string
+	finalWord := ""
+	inQuotes := false
+
+	for _, char := range echoWords {
+		if char == '\'' {
+			inQuotes = !inQuotes
+			continue
+		}
+		if !inQuotes && char == ' ' {
+			if finalWord != "" {
+				results = append(results, finalWord)
+				finalWord = ""
+			}
+			continue
+		}
+		finalWord = finalWord + string(char)
+	}
+	if finalWord != "" {
+		results = append(results, finalWord)
+	}
+	return results
 }
