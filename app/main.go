@@ -132,7 +132,14 @@ func clearArguements(echoWords string) []string {
 	finalWord := ""
 	inQuotes := false
 	inDoubleQuotes := false
-	for _, char := range echoWords {
+	for i := 0; i < len(echoWords); i++ {
+		char := echoWords[i]
+		if char == '\\' && i+1 < len(echoWords) {
+			finalWord = finalWord + string(echoWords[i+1])
+			i++
+			continue
+		}
+
 		if char == '\'' && !inDoubleQuotes {
 			inQuotes = !inQuotes
 			continue
